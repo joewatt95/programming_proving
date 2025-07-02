@@ -17,11 +17,11 @@ datatype 'a tree =
   Tip |
   Node (left: \<open>'a tree\<close>) (item: 'a) (right: \<open>'a tree\<close>)
 
-lemma tree_eq_Node_of_ne_tip:
-  assumes \<open>tree \<noteq> Tip\<close>
-  obtains left' item' right' where
-    \<open>tree = Node left' item' right'\<close>
-  using assms tree.exhaust_sel by blast
+lemma tree_ne_Tip_iff_eq_Node:
+  \<open>tree \<noteq> Tip \<longleftrightarrow> (\<exists> left' item' right'. tree = Node left' item' right')\<close>
+  by (blast intro: tree.exhaust_sel)
+
+lemmas tree_simps = tree.case_eq_if tree_ne_Tip_iff_eq_Node
 
 abbreviation \<open>Leaf \<equiv> flip (Node Tip) Tip\<close>
 
@@ -58,9 +58,7 @@ lemma ins_correct_2:
   shows \<open>tree_ordered <| ins x tree\<close>
  using assms
  apply (induction tree)
- by (auto
-  simp add: tree.case_eq_if
-  elim!: ins.elims tree_eq_Node_of_ne_tip)
+ by (auto simp add: tree_simps elim!: ins.elims)
 
 end
 
