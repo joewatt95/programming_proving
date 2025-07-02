@@ -1,0 +1,12 @@
+session Programming_Proving = "HOL" +
+  options [timeout = 300]
+
+  sessions
+    "HOL-Library"
+
+  directories
+    "Utils"
+
+  theories
+    "Tree"
+    "Utils_Basic"
