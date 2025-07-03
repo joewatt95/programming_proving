@@ -21,12 +21,12 @@ abbreviation \<open>Leaf \<equiv> flip (Node Tip) Tip\<close>
 
 abbreviation \<open>tree_to_set \<equiv> rec_tree \<emptyset> (\<lambda> _ item' _. insert item' >>> (\<union>))\<close>
 
-definition tree_ordered :: \<open>'a::{linorder} tree \<Rightarrow> bool\<close> where
-  \<open>tree_ordered \<equiv> rec_tree True (
+definition ord :: \<open>'a::{linorder} tree \<Rightarrow> bool\<close> where
+  \<open>ord \<equiv> rec_tree True (
     \<lambda> left' item' right' left_ordered right_ordered.
-      left_ordered \<and> right_ordered \<and>
-      (\<forall> x \<in> tree_to_set left'. x \<le> item') \<and>
-      (\<forall> x \<in> tree_to_set right'. x \<ge> item'))\<close>
+      left_ordered \<and> right_ordered \<and> (
+        let cmp_item = \<lambda> cmp tree. \<forall> x \<in> tree_to_set tree. cmp item' x
+        in cmp_item (\<ge>) left' \<and> cmp_item (\<le>) right'))\<close>
 
 fun ins :: \<open>'a::{linorder} \<Rightarrow> 'a tree \<Rightarrow> 'a tree\<close> where
   \<open>ins x Tip = Leaf x\<close> |
@@ -40,8 +40,9 @@ lemma tree_to_set_ins_eq_insert_tree_to_set [simp]:
   by (induction tree) auto
 
 lemma tree_ordered_ins_of_ordered:
-  \<open>tree_ordered tree \<Longrightarrow> tree_ordered (ins x tree)\<close>
-  by (induction tree) (auto simp add: tree_ordered_def)
+  assumes \<open>ord tree\<close>
+  shows \<open>ord <| ins x tree\<close>
+  using assms by (induction tree) (auto simp add: ord_def)
 
 end
 
