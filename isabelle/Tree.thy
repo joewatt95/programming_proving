@@ -23,8 +23,8 @@ abbreviation \<open>tree_to_set \<equiv> rec_tree \<emptyset> (\<lambda> _ item'
 
 definition ord :: \<open>'a::{linorder} tree \<Rightarrow> bool\<close> where
   \<open>ord \<equiv> rec_tree True (
-    \<lambda> left' item' right' left_ordered right_ordered.
-      left_ordered \<and> right_ordered \<and> (
+    \<lambda> left' item' right' left_ord right_ord.
+      left_ord \<and> right_ord \<and> (
         let cmp_item = \<lambda> cmp tree. \<forall> x \<in> tree_to_set tree. cmp item' x
         in cmp_item (\<ge>) left' \<and> cmp_item (\<le>) right'))\<close>
 
