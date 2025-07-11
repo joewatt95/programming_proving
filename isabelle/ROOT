@@ -9,4 +9,6 @@ session Programming_Proving = "HOL" +
 
   theories
     "Tree"
+    "Balanced_Parens"
+    
     "Utils_Basic"
