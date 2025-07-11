@@ -12,12 +12,41 @@ type_synonym parens = \<open>paren list\<close>
 
 inductive balanced_ind :: \<open>parens \<Rightarrow> bool\<close> where
   empty [simp]: \<open>balanced_ind []\<close> |
-  balanced_ind_pair:
+  pair:
     \<open>balanced_ind <| open_paren # parens @ [close_paren]\<close>
     if \<open>balanced_ind parens\<close> |
-  balanced'_append:
+  append:
     \<open>balanced_ind <| parens @ parens'\<close>
     if \<open>balanced_ind parens\<close> \<open>balanced_ind parens'\<close>
+
+inductive balanced_ind' :: \<open>parens \<Rightarrow> bool\<close> where
+  empty [simp]: \<open>balanced_ind' []\<close> |
+  append_open_close_paren:
+    \<open>balanced_ind' <| parens @ open_paren # parens' @ [close_paren]\<close>
+    if \<open>balanced_ind' parens\<close> \<open>balanced_ind' parens'\<close>
+
+lemma balanced_ind_of_ind':
+  assumes \<open>balanced_ind' parens\<close>
+  shows \<open>balanced_ind parens\<close>
+  using assms
+  apply (induction parens rule: balanced_ind'.induct)
+  by (simp_all add: append pair)
+
+lemma balanced_ind'D:
+  assumes \<open>balanced_ind' parens\<close>
+  shows \<open>parens = [] \<or> (\<exists> parens'. parens = open_paren # parens' @ [close_paren])\<close>
+  using assms
+  apply (induction parens rule: balanced_ind'.induct)
+  by auto
+
+lemma balanced_ind'_of_ind:
+  assumes \<open>balanced_ind parens\<close>
+  shows \<open>balanced_ind' parens\<close>
+  using assms
+  apply (induction parens rule: balanced_ind.induct)
+  apply auto
+  apply (metis append_Nil append_open_close_paren balanced_ind'.empty)
+  sorry
 
 lemma even_length_of_balanced_ind:
   assumes \<open>balanced_ind parens\<close>
@@ -61,12 +90,10 @@ qed
 definition balanced :: \<open>nat \<Rightarrow> parens \<Rightarrow> bool\<close> where
   \<open>balanced n = (
     let
-      is_empty = (=) [];
-      op = \<lambda> seen_parens paren. case (seen_parens, paren) of
+      go = \<lambda> seen_parens paren. case (seen_parens, paren) of
         (open_paren # seen_parens, close_paren) \<Rightarrow> seen_parens |
-        _ \<Rightarrow> paren # seen_parens;
-      seen_parens = replicate n open_paren
-    in foldl op seen_parens >>> is_empty)\<close>
+        _ \<Rightarrow> paren # seen_parens
+    in foldl go (replicate n open_paren) >>> (=) [])\<close>
 
 lemma
   \<open>balanced 0 parens \<longleftrightarrow> balanced_ind parens\<close>
